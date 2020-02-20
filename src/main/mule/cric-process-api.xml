@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="17804c39-3dbd-4035-b64d-f869393d14c6" basePath="/api">
+		<http:request-connection host="localhost" port="${http.port}" connectionIdleTimeout="9000000"/>
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="43b2f182-468b-4f47-b3d5-6a33999968d7" basePath="/api" >
+		<http:request-connection host="localhost" port="8081" connectionIdleTimeout="90000" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="af7945dc-1eca-4524-a948-e75e9b3af499" >
+		<http:listener-connection host="0.0.0.0" port="8086" />
+	</http:listener-config>
+	<flow name="cric-process-apiFlow" doc:id="0d3eedc4-97b5-4e0a-b087-bfbc99f797ec">
+		<http:listener doc:name="Listener" doc:id="e3188db5-de42-488a-ad69-3fcfc8721993" config-ref="HTTP_Listener_config" path="/processapi"/>
+		<set-variable value='#["/playersInfo-T20"]' doc:name="Set Variable" doc:id="98e6710a-7fe1-4626-9174-69bee8fdf2a9" variableName="endpoint"/>
+		<flow-ref doc:name="get-T20s data" doc:id="30a651c7-2090-426e-9d5a-cb2e27c550e1" name="sys-api-request-flowFlow" target="t20"/>
+		<set-variable value='#["/playersInfo-ODI"]' doc:name="Set Variable" doc:id="269c1e81-f20d-41ae-bbc4-3f3438dd8ff2" variableName="endpoint"/>
+		<flow-ref doc:name="get-ODI data" doc:id="c5ff49d6-dc3f-49f0-a8f6-1fd147b9f86f" name="sys-api-request-flowFlow" target="Odi" />
+		<set-variable value='#["/PlayersInfo-Test"]' doc:name="Set Variable" doc:id="ef2c8592-1a4c-4414-b482-d10559d58634" variableName="endpoint"/>
+		<flow-ref doc:name="Flow Reference" doc:id="9dc01dd3-9452-4a6d-be97-beaf7205a4b8" name="sys-api-request-flowFlow" target="Test"/>
+		<ee:transform doc:name="Transform Message" doc:id="dbebb7b0-e7ef-484f-bd0f-ba3841efbc6b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var cal= if ((vars.t20.PlayersInfo.Name== vars.Odi.PlayersInfo.Name) and (vars.t20.Playersfo.Name== vars.Test.PlayersInfo.Name)) true else false
+---
+
+{
+	PlayersInfoT20: vars.t20.PlayersInfo map(item, index) ->
+{
+	Name: item.Name,
+	T20Runs: item.BatStats.Runs,
+	BatsmanRole:item.Role
+},
+PlayersInfODI0: vars.Odi.PlayersInfo map(val, index) ->
+{
+	Name: val.Name,
+	T20Runs: val.BatStats.Runs	
+}
+
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

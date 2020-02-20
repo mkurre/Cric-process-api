@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="0422895e-253f-4807-8d9f-04253881a4ae" file="${env}.yaml" />
+	<global-property doc:name="Global Property" doc:id="f4040544-5043-4181-96f1-41a821267f42" name="env" value="Sandbox" />
+</mule>
